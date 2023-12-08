@@ -13,8 +13,8 @@
 #define DONE mrb_gc_arena_restore(mrb, 0);
 
 typedef struct {
-  char *str;
-  mrb_int len;
+  sam_hdr_t *hdr;
+  bam1_t *bam1;
 } mrb_bam_data;
 
 static const struct mrb_data_type mrb_bam_data_type = {
@@ -24,8 +24,8 @@ static const struct mrb_data_type mrb_bam_data_type = {
 static mrb_value mrb_bam_init(mrb_state *mrb, mrb_value self)
 {
   mrb_bam_data *data;
-  char *str;
-  mrb_int len;
+  sam_hdr_t *hdr;
+  bam1_t *bam1;
 
   data = (mrb_bam_data *)DATA_PTR(self);
   if (data) {
@@ -34,34 +34,28 @@ static mrb_value mrb_bam_init(mrb_state *mrb, mrb_value self)
   DATA_TYPE(self) = &mrb_bam_data_type;
   DATA_PTR(self) = NULL;
 
-  mrb_get_args(mrb, "s", &str, &len);
+  mrb_get_args(mrb, "s", &hdr, &bam1);
   data = (mrb_bam_data *)mrb_malloc(mrb, sizeof(mrb_bam_data));
-  data->str = str;
-  data->len = len;
+  data->hdr = hdr;
+  data->bam1 = bam1;
   DATA_PTR(self) = data;
 
   return self;
 }
 
-static mrb_value mrb_bam_hello(mrb_state *mrb, mrb_value self)
+static mrb_value mrb_bam_tid(mrb_state *mrb, mrb_value self)
 {
   mrb_bam_data *data = DATA_PTR(self);
 
-  return mrb_str_new(mrb, data->str, data->len);
-}
-
-static mrb_value mrb_bam_hi(mrb_state *mrb, mrb_value self)
-{
-  return mrb_str_new_cstr(mrb, "hi!!");
+  return mrb_fixnum_value(data->bam1->core.tid);
 }
 
 void mrb_mruby_bam_gem_init(mrb_state *mrb)
 {
   struct RClass *bam;
   bam = mrb_define_class(mrb, "Bam", mrb->object_class);
-  mrb_define_method(mrb, bam, "initialize", mrb_bam_init, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, bam, "hello", mrb_bam_hello, MRB_ARGS_NONE());
-  mrb_define_class_method(mrb, bam, "hi", mrb_bam_hi, MRB_ARGS_NONE());
+  mrb_define_method(mrb, bam, "initialize", mrb_bam_init, MRB_ARGS_REQ(2));
+  mrb_define_method(mrb, bam, "tid", mrb_bam_tid, MRB_ARGS_NONE());
   DONE;
 }
 
