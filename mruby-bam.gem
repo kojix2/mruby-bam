@@ -1,0 +1,7 @@
+name: mruby-bam
+description: Bam class
+author: kojix2
+website: https://github.com/kojix2/mruby-bam
+protocol: git
+repository: https://github.com/kojix2/mruby-bam.git
+license: MIT
