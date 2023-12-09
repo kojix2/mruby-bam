@@ -34,12 +34,6 @@ static mrb_value mrb_bam_init(mrb_state *mrb, mrb_value self)
   DATA_TYPE(self) = &mrb_bam_data_type;
   DATA_PTR(self) = NULL;
 
-  mrb_get_args(mrb, "s", &hdr, &bam1);
-  data = (mrb_bam_data *)mrb_malloc(mrb, sizeof(mrb_bam_data));
-  data->hdr = hdr;
-  data->bam1 = bam1;
-  DATA_PTR(self) = data;
-
   return self;
 }
 
@@ -50,12 +44,20 @@ static mrb_value mrb_bam_tid(mrb_state *mrb, mrb_value self)
   return mrb_fixnum_value(data->bam1->core.tid);
 }
 
+static mrb_value mrb_bam_qname(mrb_state *mrb, mrb_value self)
+{
+  mrb_bam_data *data = DATA_PTR(self);
+
+  return mrb_str_new_cstr(mrb, bam_get_qname(data->bam1));
+}
+
 void mrb_mruby_bam_gem_init(mrb_state *mrb)
 {
   struct RClass *bam;
   bam = mrb_define_class(mrb, "Bam", mrb->object_class);
   mrb_define_method(mrb, bam, "initialize", mrb_bam_init, MRB_ARGS_REQ(2));
   mrb_define_method(mrb, bam, "tid", mrb_bam_tid, MRB_ARGS_NONE());
+  mrb_define_method(mrb, bam, "qname", mrb_bam_qname, MRB_ARGS_NONE());
   DONE;
 }
 
